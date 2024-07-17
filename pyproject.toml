@@ -1,7 +1,7 @@
 [project]
 name = "marzbanpy"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.5.2"
+description = "An unofficial library for marzban panel"
 authors = [
     { name = "Бертолло Виктор", email = "bertollo.victor@gmail.com" }
 ]
@@ -10,7 +10,7 @@ dependencies = [
     "pydantic==2.8.2",
 ]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.10"
 
 [build-system]
 requires = ["hatchling"]

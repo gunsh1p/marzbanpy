@@ -1,7 +1,7 @@
 from .marzban import Marzban
+from . import types
 
-__all__ = (
-    "Marzban",
-)
+__all__ = ("Marzban", "types")
 
-panel = Marzban()
+async def test():
+    admin = await types.Admin.current(Marzban())

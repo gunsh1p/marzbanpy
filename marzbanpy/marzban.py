@@ -1,6 +1,8 @@
 import httpx
 
 from .types import Token
+from .types import MarzbanResponse
+from .exceptions import ValidationError
 
 
 class Marzban:
@@ -33,13 +35,15 @@ class Marzban:
 
     async def _send_request(
         self,
+        *,
         method: str,
         path: str,
         data: dict | list | None,
         query_params: dict | None = None,
         as_content: bool = True,
         auth: bool = True,
-    ) -> list | dict | None:
+    ) -> MarzbanResponse:
+        """Send request to marzban api"""
         headers = None
         if auth:
             headers = {
@@ -58,8 +62,15 @@ class Marzban:
                 data=data,
                 params=params,
             )
+        return MarzbanResponse(status=response.status_code, content=response.json())
 
     async def get_token(self) -> None:
         """Gets a token from the Marzban server."""
-        response: dict = await self._send_request()
-        self.token = Token(**response)
+        data = {"username": self.username, "password": self.password}
+        response: MarzbanResponse = await self._send_request(
+            method="POST", url="/api/admin/token", data=data, auth=False
+        )
+        if response.status == 422:
+            detail = response.content["detail"]
+            raise ValidationError(detail)
+        self.token = Token(**response.content)
