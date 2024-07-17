@@ -17,7 +17,7 @@ class DetailedMarzbanError(MarzbanError):
         self.message = message
 
     def __str__(self) -> str:
-        message = f"{self.code}, {self.message}"
+        message = f"HTTP error code: {self.code}, Message: '{self.message}'"
         return message
 
     def __repr__(self) -> str:

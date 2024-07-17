@@ -1,12 +1,12 @@
-from enum import Enum
 import json
 
 from pydantic import BaseModel
 import httpx
 
 from .marzban_response import MarzbanResponse
+from .enums.system import Protocol, Network, Security
 from .token import Token
-from .exceptions import UnauthorizedError, ValidationError
+from .utils import raise_exception_on_status
 
 
 class Stats(BaseModel):
@@ -21,27 +21,6 @@ class Stats(BaseModel):
     outgoing_bandwidth: int
     incoming_bandwidth_speed: int
     outgoing_bandwidth_speed: int
-
-class Protocol(str, Enum):
-    VMESS = "vmess"
-    VLESS = "vless"
-    TROJAN = "trojan"
-    SHADOWSOCKS = "shadowsocks"
-
-class Network(str, Enum):
-    TCP = "tcp"
-    WS = "ws"
-    H2 = "h2"
-    GRPC = "grpc"
-    QUIC = "quic"
-    KCP = "kcp"
-    HTTPUPGRADE = "httpupgrade"
-    SPLITHTTP = "splithttp"
-
-class Security(str, Enum):
-    NONE = "none"
-    TLS = "tls"
-    REALITY = "reality"
 
 class Inbound(BaseModel):
     tag: str
@@ -89,7 +68,7 @@ class Marzban:
         method: str,
         path: str,
         data: dict | list | None = {},
-        as_content: bool = False,
+        as_content: bool = True,
         query_params: dict | None = None,
         auth: bool = True,
     ) -> MarzbanResponse:
@@ -103,7 +82,7 @@ class Marzban:
         url = f"{self.protocol}://{self.host}:{self.port}{path}"
         async with httpx.AsyncClient(headers=headers) as client:
             if as_content:
-                content = json.dumps(data)
+                content = json.dumps(data) if data is not None else None
                 response = await client.request(
                     method=method,
                     url=url,
@@ -124,11 +103,9 @@ class Marzban:
         url = "/api/admin/token"
         data = {"username": self.username, "password": self.password}
         response: MarzbanResponse = await self._send_request(
-            method="POST", path=url, data=data, auth=False
+            method="POST", path=url, data=data, as_content=False, auth=False
         )
-        if response.status == 422:
-            detail = response.content["detail"]
-            raise ValidationError(detail)
+        raise_exception_on_status(response)
         self.token = Token(**response.content)
     
     async def get_system(self) -> System:
@@ -137,18 +114,14 @@ class Marzban:
         response: MarzbanResponse = await self._send_request(
             method="GET", path=url
         )
-        
-        if response.status == 401:
-            raise UnauthorizedError()
+        raise_exception_on_status(response)
         stats = Stats(**response.content)
 
         url = "/api/inbounds"
         response: MarzbanResponse = await self._send_request(
             method="GET", path=url
         )
-        
-        if response.status == 401:
-            raise UnauthorizedError()
+        raise_exception_on_status(response)
         inbounds: list[Inbound] = []
         for _, proto_inbounds in response.content.items():
             for inbound in list(proto_inbounds):

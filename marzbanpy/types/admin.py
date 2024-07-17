@@ -1,19 +1,14 @@
 from typing import TypeVar, Type
 
-from .. import marzban
+from .base import Base
+from ..marzban import Marzban
 from ..marzban_response import MarzbanResponse
-from ..exceptions import (
-    UnauthorizedError,
-    ForbiddenError,
-    NotFoundError,
-    ConflictError,
-    ValidationError,
-)
+from ..utils import raise_exception_on_status
 
 ADMIN = TypeVar("ADMIN", bound="Admin")
 
 
-class Admin:
+class Admin(Base):
     exists: bool = False
 
     def __init__(
@@ -31,7 +26,7 @@ class Admin:
         self.telegram_id = telegram_id
         self.discord_webhook = discord_webhook
 
-    async def save(self, panel: marzban.Marzban) -> None:
+    async def save(self, panel: Marzban) -> None:
         url = "/api/admin"
         data = {
             "password": self.password,
@@ -47,46 +42,21 @@ class Admin:
         else:
             data["username"] = self.username
             response: MarzbanResponse = await panel._send_request(
-                method="POST", path=url, data=data, as_content=True
+                method="POST", path=url, data=data
             )
-
-        match response.status:
-            case 401:
-                raise UnauthorizedError()
-            case 403:
-                raise ForbiddenError()
-            case 404:
-                detail: str = response.content["detail"]
-                raise NotFoundError(detail)
-            case 409:
-                detail: str = response.content["detail"]
-                raise ConflictError(detail)
-            case 422:
-                detail: dict = response.content["detail"]
-                raise ValidationError(detail)
+        raise_exception_on_status(response)
         self.exists = True
 
-    async def delete(self, panel: marzban.Marzban) -> None:
+    async def delete(self, panel: Marzban) -> None:
         url = f"/api/admin/{self.username}"
         response: MarzbanResponse = await panel._send_request(method="DELETE", path=url)
-
-        match response.status:
-            case 401:
-                raise UnauthorizedError()
-            case 403:
-                raise ForbiddenError()
-            case 404:
-                detail: str = response.content["detail"]
-                raise NotFoundError(detail)
-            case 422:
-                detail: dict = response.content["detail"]
-                raise ValidationError(detail)
+        raise_exception_on_status(response)
         self.exists = False
 
     @classmethod
     async def create(
         cls: Type[ADMIN],
-        panel: marzban.Marzban,
+        panel: Marzban,
         *,
         username: str,
         password: str,
@@ -105,18 +75,7 @@ class Admin:
         response: MarzbanResponse = await panel._send_request(
             method="POST", path=url, data=data
         )
-
-        match response.status:
-            case 401:
-                raise UnauthorizedError()
-            case 403:
-                raise ForbiddenError()
-            case 409:
-                detail: str = response.content["detail"]
-                raise ConflictError(detail)
-            case 422:
-                detail: dict = response.content["detail"]
-                raise ValidationError(detail)
+        raise_exception_on_status(response)
         admin: ADMIN = cls(
             username=username,
             password=password,
@@ -128,21 +87,13 @@ class Admin:
         return admin
 
     @classmethod
-    async def get_or_none(cls: Type[ADMIN], panel: marzban.Marzban, *, username: str) -> ADMIN | None:
+    async def get_or_none(cls: Type[ADMIN], panel: Marzban, *, username: str) -> ADMIN | None:
         url = "/api/admins"
         query_params = {"offset": 0, "limit": 0, "username": username}
         response: MarzbanResponse = await panel._send_request(
             method="GET", path=url, query_params=query_params
         )
-
-        match response.status:
-            case 401:
-                raise UnauthorizedError()
-            case 403:
-                raise ForbiddenError()
-            case 422:
-                detail = response.content["detail"]
-                raise ValidationError(detail)
+        raise_exception_on_status(response)
         for data in response.content:
             if data['username'] == username:
                 admin: ADMIN = cls(**data)
@@ -151,12 +102,10 @@ class Admin:
         return None
 
     @classmethod
-    async def current(cls: Type[ADMIN], panel: marzban.Marzban) -> ADMIN:
+    async def current(cls: Type[ADMIN], panel: Marzban) -> ADMIN:
         url = "/api/admin"
         response: MarzbanResponse = await panel._send_request(method="GET", path=url)
-
-        if response.status == 401:
-            raise UnauthorizedError()
+        raise_exception_on_status(response)
         admin: ADMIN = cls(**response.content)
         admin.exists = True
         return admin
@@ -164,7 +113,7 @@ class Admin:
     @classmethod
     async def list(
         cls: Type[ADMIN],
-        panel: marzban.Marzban,
+        panel: Marzban,
         *,
         offset: int = 0,
         limit: int = 0,
@@ -175,24 +124,10 @@ class Admin:
         response: MarzbanResponse = await panel._send_request(
             method="GET", path=url, query_params=query_params
         )
-
-        match response.status:
-            case 401:
-                raise UnauthorizedError()
-            case 403:
-                raise ForbiddenError()
-            case 422:
-                detail = response.content["detail"]
-                raise ValidationError(detail)
+        raise_exception_on_status(response)
         admins: list[ADMIN] = []
         for data in response.content:
             admin: ADMIN = cls(**data)
             admin.exists = True
             admins.append(admin)
         return admins
-
-    def __repr__(self) -> str:
-        return f"{type(self).__name__}({self.__dict__})"
-
-    def __str__(self) -> str:
-        return f"{type(self).__name__}({self.__dict__})"
