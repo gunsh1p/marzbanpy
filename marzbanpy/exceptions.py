@@ -53,6 +53,4 @@ class ValidationError(DetailedMarzbanError):
     code = 422
 
     def __init__(self, detail: dict) -> None:
-        self.message = ""
-        for k, v in detail.items():
-            self.message += f"{k}: {v}; "
+        self.message = ";".join([f"{k}: {v}" for k, v in detail.items()])

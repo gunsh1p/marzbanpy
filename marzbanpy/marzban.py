@@ -1,8 +1,58 @@
+from enum import Enum
+import json
+
+from pydantic import BaseModel
 import httpx
 
-from .types import Token
-from .types import MarzbanResponse
-from .exceptions import ValidationError
+from .marzban_response import MarzbanResponse
+from .token import Token
+from .exceptions import UnauthorizedError, ValidationError
+
+
+class Stats(BaseModel):
+    version: str
+    mem_total: int
+    mem_used: int
+    cpu_cores: int
+    cpu_usage: float
+    total_user: int
+    users_active: int
+    incoming_bandwidth: int
+    outgoing_bandwidth: int
+    incoming_bandwidth_speed: int
+    outgoing_bandwidth_speed: int
+
+class Protocol(str, Enum):
+    VMESS = "vmess"
+    VLESS = "vless"
+    TROJAN = "trojan"
+    SHADOWSOCKS = "shadowsocks"
+
+class Network(str, Enum):
+    TCP = "tcp"
+    WS = "ws"
+    H2 = "h2"
+    GRPC = "grpc"
+    QUIC = "quic"
+    KCP = "kcp"
+    HTTPUPGRADE = "httpupgrade"
+    SPLITHTTP = "splithttp"
+
+class Security(str, Enum):
+    NONE = "none"
+    TLS = "tls"
+    REALITY = "reality"
+
+class Inbound(BaseModel):
+    tag: str
+    protocol: Protocol
+    network: Network
+    tls: Security
+    port: int
+
+class System(BaseModel):
+    stats: Stats
+    inbounds: list[Inbound]
 
 
 class Marzban:
@@ -38,9 +88,9 @@ class Marzban:
         *,
         method: str,
         path: str,
-        data: dict | list | None,
+        data: dict | list | None = {},
+        as_content: bool = False,
         query_params: dict | None = None,
-        as_content: bool = True,
         auth: bool = True,
     ) -> MarzbanResponse:
         """Send request to marzban api"""
@@ -50,27 +100,59 @@ class Marzban:
                 "Content-Type": "application/json",
                 "Authorization": f"{self.token.token_type} {self.token.access_token}",
             }
+        url = f"{self.protocol}://{self.host}:{self.port}{path}"
         async with httpx.AsyncClient(headers=headers) as client:
-            url = f"{self.protocol}://{self.host}:{self.port}{path}"
-            content = data if as_content else None
-            data = data if not as_content else None
-            params = httpx.QueryParams(**query_params)
-            response = await client.request(
-                method=method,
-                url=url,
-                content=content,
-                data=data,
-                params=params,
-            )
+            if as_content:
+                content = json.dumps(data)
+                response = await client.request(
+                    method=method,
+                    url=url,
+                    content=content,
+                    params=query_params,
+                )
+            else:
+                response = await client.request(
+                    method=method,
+                    url=url,
+                    data=data,
+                    params=query_params,
+                )
         return MarzbanResponse(status=response.status_code, content=response.json())
 
     async def get_token(self) -> None:
         """Gets a token from the Marzban server."""
+        url = "/api/admin/token"
         data = {"username": self.username, "password": self.password}
         response: MarzbanResponse = await self._send_request(
-            method="POST", url="/api/admin/token", data=data, auth=False
+            method="POST", path=url, data=data, auth=False
         )
         if response.status == 422:
             detail = response.content["detail"]
             raise ValidationError(detail)
         self.token = Token(**response.content)
+    
+    async def get_system(self) -> System:
+        """Gets the stats and inbounds from the Marzban server."""
+        url = "/api/system"
+        response: MarzbanResponse = await self._send_request(
+            method="GET", path=url
+        )
+        
+        if response.status == 401:
+            raise UnauthorizedError()
+        stats = Stats(**response.content)
+
+        url = "/api/inbounds"
+        response: MarzbanResponse = await self._send_request(
+            method="GET", path=url
+        )
+        
+        if response.status == 401:
+            raise UnauthorizedError()
+        inbounds: list[Inbound] = []
+        for _, proto_inbounds in response.content.items():
+            for inbound in list(proto_inbounds):
+                inbounds.append(
+                    Inbound(**inbound)
+                )
+        return System(stats=stats, inbounds=inbounds)
