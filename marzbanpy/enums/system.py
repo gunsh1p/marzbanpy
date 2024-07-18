@@ -1,10 +1,12 @@
 from enum import Enum
 
+
 class Protocol(str, Enum):
     VMESS = "vmess"
     VLESS = "vless"
     TROJAN = "trojan"
     SHADOWSOCKS = "shadowsocks"
+
 
 class Network(str, Enum):
     TCP = "tcp"
@@ -15,6 +17,7 @@ class Network(str, Enum):
     KCP = "kcp"
     HTTPUPGRADE = "httpupgrade"
     SPLITHTTP = "splithttp"
+
 
 class Security(str, Enum):
     NONE = "none"

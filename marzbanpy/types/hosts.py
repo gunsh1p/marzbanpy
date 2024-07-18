@@ -10,6 +10,7 @@ from ..utils import raise_exception_on_status
 
 HOSTS = TypeVar("HOSTS", bound="Hosts")
 
+
 class Host(BaseModel):
     remark: str
     address: str
@@ -43,9 +44,7 @@ class Hosts(Base):
     @classmethod
     async def get(cls: Type[HOSTS], panel: Marzban) -> HOSTS:
         url = "/api/hosts"
-        response: MarzbanResponse = await panel._send_request(
-            method="GET", path=url
-        )
+        response: MarzbanResponse = await panel._send_request(method="GET", path=url)
         raise_exception_on_status(response)
         hosts = {}
         for k, v in response.content.items():

@@ -87,7 +87,9 @@ class Admin(Base):
         return admin
 
     @classmethod
-    async def get_or_none(cls: Type[ADMIN], panel: Marzban, *, username: str) -> ADMIN | None:
+    async def get_or_none(
+        cls: Type[ADMIN], panel: Marzban, *, username: str
+    ) -> ADMIN | None:
         url = "/api/admins"
         query_params = {"offset": 0, "limit": 0, "username": username}
         response: MarzbanResponse = await panel._send_request(
@@ -95,7 +97,7 @@ class Admin(Base):
         )
         raise_exception_on_status(response)
         for data in response.content:
-            if data['username'] == username:
+            if data["username"] == username:
                 admin: ADMIN = cls(**data)
                 admin.exists = True
                 return admin
@@ -111,7 +113,7 @@ class Admin(Base):
         return admin
 
     @classmethod
-    async def list(
+    async def all(
         cls: Type[ADMIN],
         panel: Marzban,
         *,

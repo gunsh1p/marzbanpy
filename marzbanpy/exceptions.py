@@ -29,6 +29,7 @@ class UnauthorizedError(MarzbanError):
 
     code = 401
 
+
 class ForbiddenError(MarzbanError):
     """Exception raised when you are not allowed"""
 

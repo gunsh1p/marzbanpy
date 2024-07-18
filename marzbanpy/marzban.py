@@ -22,12 +22,14 @@ class Stats(BaseModel):
     incoming_bandwidth_speed: int
     outgoing_bandwidth_speed: int
 
+
 class Inbound(BaseModel):
     tag: str
     protocol: Protocol
     network: Network
     tls: Security
     port: int
+
 
 class System(BaseModel):
     stats: Stats
@@ -107,25 +109,19 @@ class Marzban:
         )
         raise_exception_on_status(response)
         self.token = Token(**response.content)
-    
+
     async def get_system(self) -> System:
         """Gets the stats and inbounds from the Marzban server."""
         url = "/api/system"
-        response: MarzbanResponse = await self._send_request(
-            method="GET", path=url
-        )
+        response: MarzbanResponse = await self._send_request(method="GET", path=url)
         raise_exception_on_status(response)
         stats = Stats(**response.content)
 
         url = "/api/inbounds"
-        response: MarzbanResponse = await self._send_request(
-            method="GET", path=url
-        )
+        response: MarzbanResponse = await self._send_request(method="GET", path=url)
         raise_exception_on_status(response)
         inbounds: list[Inbound] = []
         for _, proto_inbounds in response.content.items():
             for inbound in list(proto_inbounds):
-                inbounds.append(
-                    Inbound(**inbound)
-                )
+                inbounds.append(Inbound(**inbound))
         return System(stats=stats, inbounds=inbounds)
