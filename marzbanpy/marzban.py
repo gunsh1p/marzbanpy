@@ -1,7 +1,7 @@
 import json
 
 from pydantic import BaseModel
-import httpx
+from httpx import AsyncClient
 
 from .marzban_response import MarzbanResponse
 from .enums.system import Protocol, Network, Security
@@ -38,6 +38,7 @@ class System(BaseModel):
 
 class Marzban:
     """The Marzban class represents a connection to a Marzban server. It provides a way to interact with the server, sending and receiving data."""
+    session: AsyncClient = AsyncClient()
 
     def __init__(
         self,
@@ -82,22 +83,23 @@ class Marzban:
                 "Authorization": f"{self.token.token_type} {self.token.access_token}",
             }
         url = f"{self.protocol}://{self.host}:{self.port}{path}"
-        async with httpx.AsyncClient(headers=headers) as client:
-            if as_content:
-                content = json.dumps(data) if data is not None else None
-                response = await client.request(
-                    method=method,
-                    url=url,
-                    content=content,
-                    params=query_params,
-                )
-            else:
-                response = await client.request(
-                    method=method,
-                    url=url,
-                    data=data,
-                    params=query_params,
-                )
+        if as_content:
+            content = json.dumps(data) if data is not None else None
+            response = await self.session.request(
+                method=method,
+                url=url,
+                headers=headers,
+                content=content,
+                params=query_params,
+            )
+        else:
+            response = await self.session.request(
+                method=method,
+                url=url,
+                headers=headers,
+                data=data,
+                params=query_params,
+            )
         return MarzbanResponse(status=response.status_code, content=response.json())
 
     async def get_token(self) -> None:
