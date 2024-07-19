@@ -104,8 +104,8 @@ class Marzban:
             )
         return MarzbanResponse(status=response.status_code, content=response.json())
 
-    async def get_token(self) -> None:
-        """Gets a token from the Marzban server."""
+    async def auth(self) -> None:
+        """Auth (gets a token from the Marzban server) in panel"""
         url = "/api/admin/token"
         data = {"username": self.username, "password": self.password}
         response: MarzbanResponse = await self._send_request(
