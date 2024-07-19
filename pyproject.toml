@@ -10,7 +10,9 @@ dependencies = [
     "pydantic==2.8.2",
 ]
 readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">= 3.10"
+keywords = ["marzban", "xtls", "vless", "vmess", "shadowsocks", "trojan", "xray", "xray-core"]
 
 [build-system]
 requires = ["hatchling"]
