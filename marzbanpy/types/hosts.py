@@ -36,9 +36,7 @@ class Hosts(Base):
         data = {}
         for k, v in self.hosts.items():
             data[k] = [host.model_dump() for host in v]
-        response: MarzbanResponse = await panel._send_request(
-            method="PUT", path=url, data=data
-        )
+        response: MarzbanResponse = await panel._send_request(method="PUT", path=url, data=data)
         raise_exception_on_status(response)
 
     @classmethod

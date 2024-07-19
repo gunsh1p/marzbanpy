@@ -218,9 +218,7 @@ class User(Base):
     ) -> USER:
         url = "/api/user"
         on_hold_timeout = (
-            on_hold_timeout.strftime(TIME_FORMAT)
-            if on_hold_timeout is not None
-            else None
+            on_hold_timeout.strftime(TIME_FORMAT) if on_hold_timeout is not None else None
         )
         data = {
             "username": username,
@@ -234,9 +232,7 @@ class User(Base):
             "on_hold_timeout": on_hold_timeout,
             "on_hold_expire_duration": on_hold_expire_duration,
         }
-        response: MarzbanResponse = await panel._send_request(
-            method="POST", path=url, data=data
-        )
+        response: MarzbanResponse = await panel._send_request(method="POST", path=url, data=data)
         raise_exception_on_status(response)
         user: USER = cls(**response.content)
         user.exists = True
@@ -274,9 +270,7 @@ class User(Base):
         if search is not None:
             query_params["search"] = search
         if isinstance(admin, list):
-            query_params["admin"] = [
-                v if isinstance(v, str) else v.username for v in admin
-            ]
+            query_params["admin"] = [v if isinstance(v, str) else v.username for v in admin]
         if status is not None:
             query_params["status"] = status.value
         if sort is not None:

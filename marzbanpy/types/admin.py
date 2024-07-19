@@ -72,9 +72,7 @@ class Admin(Base):
             "telegram_id": telegram_id,
             "discord_webhook": discord_webhook,
         }
-        response: MarzbanResponse = await panel._send_request(
-            method="POST", path=url, data=data
-        )
+        response: MarzbanResponse = await panel._send_request(method="POST", path=url, data=data)
         raise_exception_on_status(response)
         admin: ADMIN = cls(
             username=username,
@@ -87,9 +85,7 @@ class Admin(Base):
         return admin
 
     @classmethod
-    async def get_or_none(
-        cls: Type[ADMIN], panel: Marzban, *, username: str
-    ) -> ADMIN | None:
+    async def get_or_none(cls: Type[ADMIN], panel: Marzban, *, username: str) -> ADMIN | None:
         url = "/api/admins"
         query_params = {"offset": 0, "limit": 0, "username": username}
         response: MarzbanResponse = await panel._send_request(

@@ -1,4 +1,5 @@
 import json
+import asyncio
 
 from pydantic import BaseModel
 from httpx import AsyncClient
@@ -38,6 +39,7 @@ class System(BaseModel):
 
 class Marzban:
     """The Marzban class represents a connection to a Marzban server. It provides a way to interact with the server, sending and receiving data."""
+
     session: AsyncClient = AsyncClient()
 
     def __init__(
@@ -114,16 +116,17 @@ class Marzban:
 
     async def get_system(self) -> System:
         """Gets the stats and inbounds from the Marzban server."""
-        url = "/api/system"
-        response: MarzbanResponse = await self._send_request(method="GET", path=url)
-        raise_exception_on_status(response)
-        stats = Stats(**response.content)
-
-        url = "/api/inbounds"
-        response: MarzbanResponse = await self._send_request(method="GET", path=url)
-        raise_exception_on_status(response)
+        url_system = "/api/system"
+        url_inbounds = "/api/inbounds"
+        response_system, response_inbounds = await asyncio.gather(
+            self._send_request(method="GET", path=url_system),
+            self._send_request(method="GET", path=url_inbounds),
+        )
+        raise_exception_on_status(response_system)
+        raise_exception_on_status(response_inbounds)
+        stats = Stats(**response_system.content)
         inbounds: list[Inbound] = []
-        for proto_inbounds in response.content.values():
+        for proto_inbounds in response_inbounds.content.values():
             for inbound in list(proto_inbounds):
                 inbounds.append(Inbound(**inbound))
         return System(stats=stats, inbounds=inbounds)
