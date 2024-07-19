@@ -1,6 +1,6 @@
 [project]
 name = "marzbanpy"
-version = "1.5.2"
+version = "1.0.1"
 description = "An unofficial library for marzban panel"
 authors = [
     { name = "Бертолло Виктор", email = "bertollo.victor@gmail.com" }
