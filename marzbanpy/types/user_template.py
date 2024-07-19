@@ -66,9 +66,7 @@ class UserTemplate(Base):
         self.exists = False
 
     @classmethod
-    async def get(
-        cls: Type[USER_TEMPLATE], panel: Marzban, id: int
-    ) -> USER_TEMPLATE:
+    async def get(cls: Type[USER_TEMPLATE], panel: Marzban, id: int) -> USER_TEMPLATE:
         url = f"/api/user_template/{id}"
         response: MarzbanResponse = await panel._send_request(method="GET", path=url)
         raise_exception_on_status(response)
