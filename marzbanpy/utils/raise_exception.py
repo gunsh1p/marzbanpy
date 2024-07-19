@@ -10,6 +10,8 @@ from ..exceptions import (
 
 def raise_exception_on_status(response: MarzbanResponse) -> None:
     match response.status:
+        case 200:
+            return None
         case 401:
             raise UnauthorizedError()
         case 403:

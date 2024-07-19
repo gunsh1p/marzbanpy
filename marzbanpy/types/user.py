@@ -246,7 +246,9 @@ class User(Base):
         url = f"/api/user/{username}"
         response: MarzbanResponse = await panel._send_request(method="GET", path=url)
         raise_exception_on_status(response)
-        return cls(**response.content)
+        user = cls(**response.content)
+        user.exists = True
+        return user
 
     @classmethod
     async def all(
