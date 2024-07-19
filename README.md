@@ -2,6 +2,12 @@
 
 An unofficial library for marzban panel
 
+## Install
+
+```sh
+pip install marzbanpy
+```
+
 ## Example
 
 ```python
