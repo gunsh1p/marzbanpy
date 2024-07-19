@@ -58,7 +58,7 @@ Don't forget to give the project a star! Thanks again!
 
 ### License
 
-The project is under the [GPL-3.0](https://github.com/gunsh1p/marzbanpy/blob/main/LICENSE) licence
+The project is under the [MIT](https://github.com/gunsh1p/marzbanpy/blob/main/LICENSE) licence
 
 ### Contacts
 
