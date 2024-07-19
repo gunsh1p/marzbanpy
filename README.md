@@ -25,7 +25,7 @@ async def main():
         username="admin",
         password="admin123"
     )
-    await panel.get_token()
+    await panel.auth()
 
     users = await User.all(
         panel, 
