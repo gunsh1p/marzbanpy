@@ -34,7 +34,7 @@ class Proxy(BaseModel):
         return data
 
 
-class NodeUsage(BaseModel):
+class UserNodeUsage(BaseModel):
     node_id: int | None
     node_name: str
     used_traffic: int
@@ -42,7 +42,7 @@ class NodeUsage(BaseModel):
 
 class UsageData(BaseModel):
     username: str
-    usages: list[NodeUsage]
+    usages: list[UserNodeUsage]
 
 
 class User(Base):
