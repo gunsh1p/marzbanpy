@@ -70,7 +70,7 @@ class Marzban:
         *,
         method: str,
         path: str,
-        data: dict | list | None = {},
+        data: dict | list | None = None,
         as_content: bool = True,
         query_params: dict | None = None,
         auth: bool = True,
@@ -123,7 +123,7 @@ class Marzban:
         response: MarzbanResponse = await self._send_request(method="GET", path=url)
         raise_exception_on_status(response)
         inbounds: list[Inbound] = []
-        for _, proto_inbounds in response.content.items():
+        for proto_inbounds in response.content.values():
             for inbound in list(proto_inbounds):
                 inbounds.append(Inbound(**inbound))
         return System(stats=stats, inbounds=inbounds)
