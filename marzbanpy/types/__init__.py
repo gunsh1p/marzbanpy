@@ -1,7 +1,6 @@
 from .admin import Admin
 from .hosts import Host, Hosts
-from .user import User, Proxy, UserNodeUsage
-from .user_template import UserTemplate
+from .user import User, Proxy, UserNodeUsage, UserTemplate
 from .node import Node, NodeSettings, NodeUsage
 
 __all__ = (

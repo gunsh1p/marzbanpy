@@ -25,6 +25,10 @@ build-backend = "hatchling.build"
 managed = true
 dev-dependencies = []
 
+[tool.ruff]
+line-length = 99
+src = ["marzbanpy"]
+
 [tool.hatch.metadata]
 allow-direct-references = true
 
