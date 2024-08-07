@@ -77,7 +77,12 @@ class User(Base):
         self.username = username
         self.expire = expire
         self.data_limit = data_limit
-        self.proxies = proxies
+        self.proxies = {}
+        for proto, proxy in proxies.items():
+            if isinstance(proxy, dict):
+                self.proxies[proto] = Proxy(**proxy)
+            else:
+                self.proxies[proto] = proxy
         self.inbounds = inbounds
         self.data_limit_reset_strategy = data_limit_reset_strategy
         self.note = note
