@@ -22,7 +22,7 @@ class DataLimitResetStrategy(str, Enum):
 
 class UserStatus(str, Enum):
     ACTIVE = "active"
-    DSIABLED = "disabled"
+    DISABLED = "disabled"
     LIMITED = "limited"
     EXPIRED = "expired"
     ON_HOLD = "on_hold"

@@ -75,7 +75,7 @@ class User(Base):
         admin: dict | None = None,
     ) -> None:
         self.username = username
-        self.expire = expire
+        self.expire = datetime.fromtimestamp(expire) if isinstance(expire, int) else expire
         self.data_limit = data_limit
         self.proxies = {}
         for proto, proxy in proxies.items():
@@ -84,7 +84,11 @@ class User(Base):
             else:
                 self.proxies[proto] = proxy
         self.inbounds = inbounds
-        self.data_limit_reset_strategy = data_limit_reset_strategy
+        self.data_limit_reset_strategy = (
+            data_limit_reset_strategy
+            if isinstance(data_limit_reset_strategy, DataLimitResetStrategy)
+            else DataLimitResetStrategy(data_limit_reset_strategy)
+        )
         self.note = note
         self.sub_updated_at = (
             datetime.strptime(sub_updated_at.split(".")[0], TIME_FORMAT)
@@ -104,7 +108,7 @@ class User(Base):
             else on_hold_timeout
         )
         self.auto_delete_in_days = auto_delete_in_days
-        self.status = status
+        self.status = status if isinstance(status, UserStatus) else UserStatus(status)
         self.used_traffic = used_traffic
         self.lifetime_used_traffic = lifetime_used_traffic
         self.created_at = (
@@ -147,7 +151,11 @@ class User(Base):
                 method="POST", path=url, data=data
             )
         raise_exception_on_status(response)
-        self.admin = Admin(**response.content["admin"])
+        self.admin = (
+            Admin(**response.content["admin"])
+            if response.content.get("admin") is not None
+            else None
+        )
         self.exists = True
 
     async def delete(self, panel: Marzban) -> None:
