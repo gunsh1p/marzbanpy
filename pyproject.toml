@@ -1,6 +1,6 @@
 [project]
 name = "marzbanpy"
-version = "1.0.2"
+version = "1.0.3"
 description = "An unofficial library for marzban panel"
 authors = [
     { name = "Бертолло Виктор", email = "bertollo.victor@gmail.com" }
@@ -15,7 +15,7 @@ requires-python = ">= 3.10"
 keywords = ["marzban", "xtls", "vless", "vmess", "shadowsocks", "trojan", "xray", "xray-core"]
 
 [project.urls]
-Repository = "https://github.com/gunsh1p/marzbanpy/"
+repository = "https://github.com/gunsh1p/marzbanpy/"
 
 [build-system]
 requires = ["hatchling"]

@@ -40,7 +40,7 @@ class System(BaseModel):
 class Marzban:
     """The Marzban class represents a connection to a Marzban server. It provides a way to interact with the server, sending and receiving data."""
 
-    session: AsyncClient = AsyncClient()
+    session: AsyncClient = AsyncClient(timeout=None)
 
     def __init__(
         self,
