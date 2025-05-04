@@ -19,6 +19,7 @@ class Admin(Base):
         is_sudo: bool = False,
         telegram_id: int = 0,
         discord_webhook: str = "",
+        **extra,
     ) -> None:
         self.username = username
         self.password = password
@@ -36,9 +37,7 @@ class Admin(Base):
         }
         if self.exists:
             url += f"/{self.username}"
-            response: MarzbanResponse = await panel._send_request(
-                method="PUT", path=url, data=data
-            )
+            response: MarzbanResponse = await panel._send_request(method="PUT", path=url, data=data)
         else:
             data["username"] = self.username
             response: MarzbanResponse = await panel._send_request(

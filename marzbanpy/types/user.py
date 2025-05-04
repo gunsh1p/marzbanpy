@@ -73,6 +73,7 @@ class User(Base):
         subscription_url: str | None = None,
         excluded_inbounds: dict[str, list[str]] | None = None,
         admin: dict | None = None,
+        **extra,
     ) -> None:
         self.username = username
         self.expire = datetime.fromtimestamp(expire) if isinstance(expire, int) else expire
@@ -124,9 +125,7 @@ class User(Base):
     async def save(self, panel: Marzban) -> None:
         url = "/api/user"
         on_hold_timeout = (
-            self.on_hold_timeout.strftime(TIME_FORMAT)
-            if self.on_hold_timeout is not None
-            else None
+            self.on_hold_timeout.strftime(TIME_FORMAT) if self.on_hold_timeout is not None else None
         )
         data = {
             "username": self.username,
@@ -142,9 +141,7 @@ class User(Base):
         }
         if self.exists:
             url += f"/{self.username}"
-            response: MarzbanResponse = await panel._send_request(
-                method="PUT", path=url, data=data
-            )
+            response: MarzbanResponse = await panel._send_request(method="PUT", path=url, data=data)
         else:
             data["username"] = self.username
             response: MarzbanResponse = await panel._send_request(
@@ -353,6 +350,7 @@ class UserTemplate(Base):
         expire_duration: timedelta | None = None,
         username_prefix: str | None = None,
         username_suffix: str | None = None,
+        **extra,
     ) -> None:
         self.id = id
         self.name = name
@@ -379,9 +377,7 @@ class UserTemplate(Base):
         }
         if self.exists:
             url += f"/{self.id}"
-            response: MarzbanResponse = await panel._send_request(
-                method="PUT", path=url, data=data
-            )
+            response: MarzbanResponse = await panel._send_request(method="PUT", path=url, data=data)
         else:
             response: MarzbanResponse = await panel._send_request(
                 method="POST", path=url, data=data

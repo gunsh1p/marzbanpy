@@ -41,6 +41,7 @@ class Node(Base):
         xray_version: str | None = None,
         status: NodeStatus | None = None,
         message: str | None = None,
+        **extra,
     ) -> None:
         self.id = id
         self.name = name
@@ -65,9 +66,7 @@ class Node(Base):
         if self.exists:
             url += f"/{self.id}"
             data["status"] = self.status.value
-            response: MarzbanResponse = await panel._send_request(
-                method="PUT", path=url, data=data
-            )
+            response: MarzbanResponse = await panel._send_request(method="PUT", path=url, data=data)
         else:
             data["add_as_new_host"] = self.add_as_new_host
             response: MarzbanResponse = await panel._send_request(

@@ -28,7 +28,7 @@ class Host(BaseModel):
 
 
 class Hosts(Base):
-    def __init__(self, hosts: dict[str, list[Host]]) -> None:
+    def __init__(self, hosts: dict[str, list[Host]], **extra) -> None:
         self.hosts = hosts
 
     async def update(self, panel: Marzban) -> None:

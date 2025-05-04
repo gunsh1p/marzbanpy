@@ -10,6 +10,7 @@ class Protocol(str, Enum):
 
 class Network(str, Enum):
     TCP = "tcp"
+    RAW = "raw"
     WS = "ws"
     H2 = "h2"
     GRPC = "grpc"
@@ -17,6 +18,7 @@ class Network(str, Enum):
     KCP = "kcp"
     HTTPUPGRADE = "httpupgrade"
     SPLITHTTP = "splithttp"
+    XHTTP = "xhttp"
 
 
 class Security(str, Enum):
